@@ -1,0 +1,262 @@
+[gd_scene load_steps=10 format=3 uid="uid://dxeskjjnnlxrb"]
+
+[ext_resource type="Script" path="res://joytype/JoyTypeListener.gd" id="1_x2o0y"]
+[ext_resource type="FontFile" uid="uid://br1hh7c6qmg7b" path="res://monogram-extended.ttf" id="2_wjq0r"]
+[ext_resource type="Script" path="res://joytype/TextEditJoyTypeWriter.gd" id="3_lbmv0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mnmpu"]
+
+[sub_resource type="Theme" id="Theme_rjmhq"]
+default_font = ExtResource("2_wjq0r")
+default_font_size = 16
+TextEdit/colors/current_line_color = Color(0.0980392, 0.0980392, 0.101961, 0.8)
+TextEdit/colors/selection_color = Color(0.5, 0.5, 0.5, 1)
+TextEdit/constants/line_spacing = 0
+TextEdit/styles/normal = SubResource("StyleBoxEmpty_mnmpu")
+
+[sub_resource type="GDScript" id="GDScript_a06mv"]
+script/source = "extends Control
+
+func _input(event):
+	$SubViewport.push_input(event)
+"
+
+[sub_resource type="GDScript" id="GDScript_7u6n5"]
+script/source = "@tool
+extends Control
+
+func _input(event):
+	queue_redraw()
+
+func _draw():
+	var device := 0
+	
+	var L_origin := Vector2( 1*size.x/4, size.y/2)
+	var R_origin := Vector2( 3*size.x/4, size.y/2)
+	var oradius := 12
+	var iradius := 4
+	
+	draw_rect(
+		Rect2(
+			L_origin - oradius * Vector2(1, 1),
+			oradius * Vector2.ONE * 2
+		),
+		Color.WHITE,
+		false
+	)
+	draw_rect(
+		Rect2(
+			R_origin - oradius * Vector2(1, 1),
+			oradius * Vector2.ONE * 2
+		),
+		Color.WHITE,
+		false
+	)
+	
+	var L := Vector2(
+		Input.get_joy_axis(device, JOY_AXIS_LEFT_X),
+		Input.get_joy_axis(device, JOY_AXIS_LEFT_Y)
+	)
+	
+	var R := Vector2(
+		Input.get_joy_axis(device, JOY_AXIS_RIGHT_X),
+		Input.get_joy_axis(device, JOY_AXIS_RIGHT_Y)
+	)
+	
+	draw_circle(L_origin + L * oradius, iradius, Color.WHITE)
+	draw_circle(R_origin + R * oradius, iradius, Color.WHITE)
+"
+
+[sub_resource type="GDScript" id="GDScript_4ldjb"]
+script/source = "@tool
+extends Control
+
+@export var joytypelistener : JoyTypeListener
+
+enum {
+	LEFT, UP, RIGHT, DOWN, NONE = -1
+}
+
+func _process(delta):
+	if Engine.is_editor_hint():
+		return
+	
+	queue_redraw()
+
+func _draw():
+	var device := 0
+	var _center := size / 2
+	
+	var L := _center + Vector2(-size.x/2, 0)
+	var U := _center + Vector2(0, -size.y/2)
+	var R := _center + Vector2( size.x/2, 0)
+	var D := _center + Vector2(0, size.y/2)
+	
+	var lr := 12
+	
+	draw_circle(L, 2, Color.WHITE)
+	draw_circle(U, 2, Color.WHITE)
+	draw_circle(R, 2, Color.WHITE)
+	draw_circle(D, 2, Color.WHITE)
+	
+	if not joytypelistener:
+		return
+	
+	var back = joytypelistener.using_backside
+	
+	text(format(joytypelistener.keys[back][LEFT][LEFT]), L + lr * Vector2.LEFT)
+	text(format(joytypelistener.keys[back][LEFT][UP]), L + lr * Vector2.UP)
+	text(format(joytypelistener.keys[back][LEFT][DOWN]), L + lr * Vector2.DOWN)
+	text(format(joytypelistener.keys[back][LEFT][RIGHT]), L + lr * Vector2.RIGHT)
+	
+	text(format(joytypelistener.keys[back][UP][LEFT]), U + lr * Vector2.LEFT)
+	text(format(joytypelistener.keys[back][UP][UP]), U + lr * Vector2.UP)
+	text(format(joytypelistener.keys[back][UP][DOWN]), U + lr * Vector2.DOWN)
+	text(format(joytypelistener.keys[back][UP][RIGHT]), U + lr * Vector2.RIGHT)
+	
+	text(format(joytypelistener.keys[back][DOWN][LEFT]), D + lr * Vector2.LEFT)
+	text(format(joytypelistener.keys[back][DOWN][UP]), D + lr * Vector2.UP)
+	text(format(joytypelistener.keys[back][DOWN][DOWN]), D + lr * Vector2.DOWN)
+	text(format(joytypelistener.keys[back][DOWN][RIGHT]), D + lr * Vector2.RIGHT)
+	
+	text(format(joytypelistener.keys[back][RIGHT][LEFT]), R + lr * Vector2.LEFT)
+	text(format(joytypelistener.keys[back][RIGHT][UP]), R + lr * Vector2.UP)
+	text(format(joytypelistener.keys[back][RIGHT][DOWN]), R + lr * Vector2.DOWN)
+	text(format(joytypelistener.keys[back][RIGHT][RIGHT]), R + lr * Vector2.RIGHT)
+
+	var LL := Vector2(
+		Input.get_joy_axis(device, JOY_AXIS_LEFT_X),
+		Input.get_joy_axis(device, JOY_AXIS_LEFT_Y)
+	)
+	
+	var RR := Vector2(
+		Input.get_joy_axis(device, JOY_AXIS_RIGHT_X),
+		Input.get_joy_axis(device, JOY_AXIS_RIGHT_Y)
+	)
+	
+	var LLp = LL*size/2
+	var RRp = RR*lr
+	var color = Color(0.41563636064529, 1, 0.1618749499321)
+	
+	draw_line(
+		Vector2(0, 0), size, Color.WHITE
+	)
+	draw_line(
+		Vector2(size.x, 0), Vector2(0, size.y), Color.WHITE
+	)
+	draw_line(_center, _center + LLp, color)
+	draw_line(_center + LLp, _center + LLp + RRp, color)
+	draw_circle(
+		_center + LLp,
+		2,
+		color
+	)
+	draw_circle(
+		_center + LLp + RRp,
+		4,
+		color
+	)
+
+func format(t:String):
+	var tt = t 
+	match tt:
+		\" \": tt = \"SPACE\"
+		\"\\n\": tt = \"NEWLINE\"
+		\"\\t\": tt = \"TAB\"
+	return tt
+
+func text(t:String, p:Vector2):
+	var font := get_theme_default_font()
+	
+	var text_size := font.get_string_size(t, HORIZONTAL_ALIGNMENT_CENTER)
+	
+	draw_string(font, p - text_size * Vector2(0.5, -.5), t, HORIZONTAL_ALIGNMENT_CENTER)
+"
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_3855n"]
+viewport_path = NodePath("SubViewport")
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_rjmhq")
+script = SubResource("GDScript_a06mv")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+size = Vector2i(320, 180)
+render_target_update_mode = 4
+
+[node name="JoyTypeListener" type="Node" parent="SubViewport"]
+script = ExtResource("1_x2o0y")
+active = true
+
+[node name="Control2" type="Control" parent="SubViewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme = SubResource("Theme_rjmhq")
+
+[node name="TextEdit" type="TextEdit" parent="SubViewport/Control2"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 120.0
+offset_right = 280.0
+grow_horizontal = 0
+grow_vertical = 2
+placeholder_text = "Use the analogues to type
+LS/L1 to turn on backside
+RS/R1 to backspace"
+wrap_mode = 1
+highlight_all_occurrences = true
+highlight_current_line = true
+draw_control_chars = true
+draw_tabs = true
+draw_spaces = true
+
+[node name="JoyTypeWriter" type="Node" parent="SubViewport/Control2/TextEdit"]
+script = ExtResource("3_lbmv0")
+
+[node name="JoyPadVisualizer" type="Control" parent="SubViewport/Control2"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = 103.0
+offset_right = 73.0
+offset_bottom = 140.0
+grow_vertical = 0
+script = SubResource("GDScript_7u6n5")
+
+[node name="JoyTypeKeys" type="Control" parent="SubViewport/Control2" node_paths=PackedStringArray("joytypelistener")]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 27.0
+offset_top = 33.0
+offset_right = 113.0
+offset_bottom = 119.0
+script = SubResource("GDScript_4ldjb")
+joytypelistener = NodePath("../../JoyTypeListener")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("ViewportTexture_3855n")
+ignore_texture_size = true
+stretch_mode = 5
+
+[connection signal="event_emitted" from="SubViewport/JoyTypeListener" to="SubViewport/Control2/TextEdit/JoyTypeWriter" method="_event_received"]
