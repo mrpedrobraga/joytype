@@ -1,8 +1,8 @@
 [gd_scene load_steps=10 format=3 uid="uid://dxeskjjnnlxrb"]
 
-[ext_resource type="Script" path="res://joytype/JoyTypeListener.gd" id="1_x2o0y"]
+[ext_resource type="Script" uid="uid://ch3flloydbrx3" path="res://joytype/JoyTypeListener.gd" id="1_x2o0y"]
 [ext_resource type="FontFile" uid="uid://br1hh7c6qmg7b" path="res://monogram-extended.ttf" id="2_wjq0r"]
-[ext_resource type="Script" path="res://joytype/TextEditJoyTypeWriter.gd" id="3_lbmv0"]
+[ext_resource type="Script" uid="uid://cceg52txtmywa" path="res://joytype/TextEditJoyTypeWriter.gd" id="3_lbmv0"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mnmpu"]
 
@@ -25,7 +25,19 @@ func _input(event):
 script/source = "@tool
 extends Control
 
-func _input(event):
+@export var action_R_LEFT  : StringName = &\"R_LEFT\"
+@export var action_R_UP    : StringName = &\"R_UP\"
+@export var action_R_DOWN  : StringName = &\"R_DOWN\"
+@export var action_R_RIGHT : StringName = &\"R_RIGHT\"
+@export var action_L_LEFT  : StringName = &\"L_LEFT\"
+@export var action_L_UP    : StringName = &\"L_UP\"
+@export var action_L_DOWN  : StringName = &\"L_DOWN\"
+@export var action_L_RIGHT : StringName = &\"L_RIGHT\"
+@export var action_SHIFT_H  : StringName = &\"SHIFT_1\"
+@export var action_SHIFT_V : StringName = &\"SHIFT_2\"
+@export var action_BACKSPACE : StringName = &\"BACKSPACE\"
+
+func _input(_event):
 	queue_redraw()
 
 func _draw():
@@ -53,14 +65,14 @@ func _draw():
 		false
 	)
 	
-	var L := Vector2(
-		Input.get_joy_axis(device, JOY_AXIS_LEFT_X),
-		Input.get_joy_axis(device, JOY_AXIS_LEFT_Y)
+	var R := Vector2(
+		Input.get_axis(action_R_LEFT, action_R_RIGHT),
+		Input.get_axis(action_R_UP, action_R_DOWN)
 	)
 	
-	var R := Vector2(
-		Input.get_joy_axis(device, JOY_AXIS_RIGHT_X),
-		Input.get_joy_axis(device, JOY_AXIS_RIGHT_Y)
+	var L := Vector2(
+		Input.get_axis(action_L_LEFT, action_L_RIGHT),
+		Input.get_axis(action_L_UP, action_L_DOWN)
 	)
 	
 	draw_circle(L_origin + L * oradius, iradius, Color.WHITE)
@@ -72,6 +84,18 @@ script/source = "@tool
 extends Control
 
 @export var joytypelistener : JoyTypeListener
+
+@export var action_R_LEFT  : StringName = &\"R_LEFT\"
+@export var action_R_UP    : StringName = &\"R_UP\"
+@export var action_R_DOWN  : StringName = &\"R_DOWN\"
+@export var action_R_RIGHT : StringName = &\"R_RIGHT\"
+@export var action_L_LEFT  : StringName = &\"L_LEFT\"
+@export var action_L_UP    : StringName = &\"L_UP\"
+@export var action_L_DOWN  : StringName = &\"L_DOWN\"
+@export var action_L_RIGHT : StringName = &\"L_RIGHT\"
+@export var action_SHIFT_H  : StringName = &\"SHIFT_1\"
+@export var action_SHIFT_V : StringName = &\"SHIFT_2\"
+@export var action_BACKSPACE : StringName = &\"BACKSPACE\"
 
 enum {
 	LEFT, UP, RIGHT, DOWN, NONE = -1
@@ -124,15 +148,15 @@ func _draw():
 	text(format(joytypelistener.keys[back][RIGHT][DOWN]), R + lr * Vector2.DOWN)
 	text(format(joytypelistener.keys[back][RIGHT][RIGHT]), R + lr * Vector2.RIGHT)
 
-	var LL := Vector2(
-		Input.get_joy_axis(device, JOY_AXIS_LEFT_X),
-		Input.get_joy_axis(device, JOY_AXIS_LEFT_Y)
-	)
-	
 	var RR := Vector2(
-		Input.get_joy_axis(device, JOY_AXIS_RIGHT_X),
-		Input.get_joy_axis(device, JOY_AXIS_RIGHT_Y)
-	)
+		Input.get_axis(action_R_LEFT, action_R_RIGHT),
+		Input.get_axis(action_R_UP, action_R_DOWN)
+	).normalized()
+	
+	var LL := Vector2(
+		Input.get_axis(action_L_LEFT, action_L_RIGHT),
+		Input.get_axis(action_L_UP, action_L_DOWN)
+	).normalized()
 	
 	var LLp = LL*size/2
 	var RRp = RR*lr
@@ -214,6 +238,7 @@ offset_left = 120.0
 offset_right = 280.0
 grow_horizontal = 0
 grow_vertical = 2
+focus_mode = 0
 placeholder_text = "Use the analogues to type
 LS/L1 to turn on backside
 RS/R1 to backspace"
@@ -237,6 +262,17 @@ offset_right = 73.0
 offset_bottom = 140.0
 grow_vertical = 0
 script = SubResource("GDScript_7u6n5")
+action_R_LEFT = null
+action_R_UP = null
+action_R_DOWN = null
+action_R_RIGHT = null
+action_L_LEFT = null
+action_L_UP = null
+action_L_DOWN = null
+action_L_RIGHT = null
+action_SHIFT_H = null
+action_SHIFT_V = null
+action_BACKSPACE = null
 
 [node name="JoyTypeKeys" type="Control" parent="SubViewport/Control2" node_paths=PackedStringArray("joytypelistener")]
 layout_mode = 1
@@ -247,6 +283,17 @@ offset_right = 113.0
 offset_bottom = 119.0
 script = SubResource("GDScript_4ldjb")
 joytypelistener = NodePath("../../JoyTypeListener")
+action_R_LEFT = null
+action_R_UP = null
+action_R_DOWN = null
+action_R_RIGHT = null
+action_L_LEFT = null
+action_L_UP = null
+action_L_DOWN = null
+action_L_RIGHT = null
+action_SHIFT_H = null
+action_SHIFT_V = null
+action_BACKSPACE = null
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -256,7 +303,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("ViewportTexture_3855n")
-ignore_texture_size = true
+expand_mode = 1
 stretch_mode = 5
 
 [connection signal="event_emitted" from="SubViewport/JoyTypeListener" to="SubViewport/Control2/TextEdit/JoyTypeWriter" method="_event_received"]

@@ -22,7 +22,7 @@ func _get_configuration_warnings():
 func _event_received(ev : JoyTypeEvent):
 	if not _te: return
 	
-	_te.grab_focus()
+	#_te.grab_focus()
 	if ev.is_text:
 		_te.insert_text_at_caret(ev.content)
 	else:
